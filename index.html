@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>河西走廊 · 丝路自驾 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sand: #e8dcc8; --sand-dark: #c9b99a; --ink: #1a1410; --ink-soft: #3d3228;
+    --ink-muted: #6b5c4e; --ochre: #c4732a; --ochre-light: #e8943a; --rust: #a03020;
+    --sky: #4a7fa5; --sky-light: #7aafc8; --sage: #5a7a5a; --cream: #f5f0e8;
+    --white: #fdfaf5; --card-bg: rgba(253,250,245,0.96);
+    --shadow: 0 4px 24px rgba(26,20,16,0.18); --shadow-sm: 0 2px 8px rgba(26,20,16,0.12);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans SC', sans-serif; background: var(--ink); color: var(--ink); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  header { background: var(--ink); color: var(--sand); padding: 0 20px; height: 52px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; border-bottom: 1px solid rgba(196,115,42,0.3); z-index: 100; position: relative; }
+  .header-title { font-family: 'Noto Serif SC', serif; font-size: 17px; font-weight: 600; letter-spacing: 0.08em; color: var(--sand); }
+  .header-title span { color: var(--ochre-light); font-weight: 300; margin-left: 8px; font-size: 13px; letter-spacing: 0.12em; }
+  .header-meta { font-size: 11px; color: var(--ink-muted); letter-spacing: 0.05em; display: flex; gap: 16px; }
+  .header-meta i { color: var(--ochre); }
+  .app { display: flex; flex: 1; overflow: hidden; }
+  .sidebar { width: 340px; min-width: 340px; background: var(--cream); display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--sand-dark); z-index: 10; }
+  .day-tabs { display: flex; overflow-x: auto; background: var(--ink-soft); padding: 8px 8px 0; gap: 2px; flex-shrink: 0; scrollbar-width: none; }
+  .day-tabs::-webkit-scrollbar { display: none; }
+  .day-tab { flex-shrink: 0; padding: 7px 12px 9px; cursor: pointer; border-radius: 6px 6px 0 0; font-size: 11px; font-weight: 500; color: var(--sand-dark); letter-spacing: 0.04em; transition: all 0.2s; background: transparent; border: none; text-align: center; line-height: 1.4; }
+  .day-tab:hover { color: var(--sand); background: rgba(255,255,255,0.06); }
+  .day-tab.active { background: var(--cream); color: var(--ochre); }
+  .day-tab .day-num { font-size: 13px; font-weight: 600; display: block; }
+  .day-tab .day-label { font-size: 9.5px; opacity: 0.8; }
+  .day-content { flex: 1; overflow-y: auto; padding: 0; scrollbar-width: thin; scrollbar-color: var(--sand-dark) transparent; }
+  .day-content::-webkit-scrollbar { width: 4px; }
+  .day-content::-webkit-scrollbar-thumb { background: var(--sand-dark); border-radius: 2px; }
+  .day-header { padding: 16px 18px 10px; background: var(--white); border-bottom: 1px solid var(--sand); position: sticky; top: 0; z-index: 5; }
+  .day-header h2 { font-family: 'Noto Serif SC', serif; font-size: 16px; font-weight: 600; color: var(--ink); letter-spacing: 0.04em; }
+  .day-header .date-line { font-size: 11px; color: var(--ink-muted); margin-top: 3px; display: flex; gap: 10px; align-items: center; }
+  .route-badge { background: var(--ochre); color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+  .spots-list { padding: 8px 10px 16px; }
+  .spot-card { background: var(--white); border-radius: var(--radius); margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; overflow: hidden; }
+  .spot-card:hover { border-color: var(--sand-dark); box-shadow: var(--shadow-sm); }
+  .spot-card.active { border-color: var(--ochre); box-shadow: 0 0 0 2px rgba(196,115,42,0.15); }
+  .spot-card-inner { display: flex; align-items: flex-start; padding: 10px 12px; gap: 10px; }
+  .spot-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+  .icon-nature { background: rgba(90,122,90,0.15); }
+  .icon-culture { background: rgba(160,48,32,0.12); }
+  .icon-transport { background: rgba(74,127,165,0.15); }
+  .icon-food { background: rgba(196,115,42,0.15); }
+  .icon-hotel { background: rgba(100,80,60,0.12); }
+  .spot-info { flex: 1; min-width: 0; }
+  .spot-name { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+  .spot-name .timing { font-size: 10px; color: var(--sky); font-weight: 400; margin-left: 6px; }
+  .spot-desc { font-size: 11.5px; color: var(--ink-muted); line-height: 1.5; }
+  .spot-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
+  .tag { font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 500; }
+  .tag-must { background: rgba(160,48,32,0.1); color: var(--rust); }
+  .tag-free { background: rgba(74,127,165,0.1); color: var(--sky); }
+  #map { flex: 1; position: relative; }
+  .map-popup { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow); padding: 14px 18px; min-width: 260px; pointer-events: none; opacity: 0; transition: all 0.25s; z-index: 50; border-top: 3px solid var(--ochre); }
+  .map-popup.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .popup-title { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .popup-body { font-size: 12px; color: var(--ink-muted); line-height: 1.6; }
+  .map-legend { position: absolute; top: 14px; right: 14px; background: var(--card-bg); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow-sm); z-index: 20; font-size: 11px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; cursor: pointer; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .loading-map { position: absolute; inset: 0; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 30; transition: opacity 0.5s; }
+  .loading-map.hidden { opacity: 0; pointer-events: none; }
+  @media (max-width: 700px) { .sidebar { width: 100%; } .app { flex-direction: column; } #map { min-height: 300px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">河西走廊 · 丝路自驾 <span>2026年5月23日—29日</span></div>
+  <div class="header-meta">
+    <span><i>✦</i> 7天6晚</span>
+    <span><i>✦</i> 3人同行</span>
+    <span><i>✦</i> 全程约1080km</span>
+  </div>
+</header>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="day-tabs" id="dayTabs"></div>
+    <div class="day-content" id="dayContent"></div>
+  </div>
+  <div id="map">
+    <div class="loading-map" id="loadingMap">
+      <div style="width:36px; height:36px; border:3px solid var(--sand); border-top-color:var(--ochre); border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+      <div style="margin-top:12px; font-size:12px; color:var(--ink-muted);">正在加载地图…</div>
+    </div>
+    <div class="map-legend" id="mapLegend"><h4>行程路线</h4></div>
+    <div class="map-popup" id="mapPopup">
+      <div id="popupDay" style="font-size:10.5px; color:var(--ochre); margin-bottom:4px;"></div>
+      <div id="popupTitle" class="popup-title"></div>
+      <div id="popupBody" class="popup-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// DATA (保持你原始的行程数据)
+// ──────────────────────────────────────────────
+const DAYS = [
+  {
+    id: 1, label: 'D1', date: '5/23', weekday: '周六',
+    title: '上海·北京 → 兰州 → 武威',
+    color: '#5a7a5a', route: '✈ 飞兰州 · 🚄 高铁至武威',
+    spots: [
+      { id: 's1', name: '兰州中川机场', timing: '上午落地', icon: '✈', type: 'transport', desc: '机场汇合后乘大巴进城约1h', tags: ['航班'], lat: 36.5153, lng: 103.6217 },
+      { id: 's2', name: '甘肃省博物馆', timing: '下午', icon: '🏛', type: 'culture', desc: '"马踏飞燕"真品在此。须提前预约', tags: ['必看'], lat: 36.0607, lng: 103.8213 },
+      { id: 's3', name: '中山桥 · 白塔山', timing: '下午', icon: '🌉', type: 'culture', desc: '天下黄河第一桥，俯瞰全景', tags: ['免费'], lat: 36.0697, lng: 103.8258 },
+      { id: 's4', name: '武威', timing: '晚', icon: '🏨', type: 'hotel', desc: '乘高铁抵武威南站，取车入住', tags: ['过夜'], lat: 37.9293, lng: 102.6383 },
+    ]
+  },
+  {
+    id: 2, label: 'D2', date: '5/24', weekday: '周日',
+    title: '武威 → 张掖',
+    color: '#c4732a', route: '🚗 G30高速 约250km',
+    spots: [
+      { id: 's5', name: '武威出发', timing: '早上', icon: '🚗', type: 'transport', desc: '早餐后上高速西行', tags: ['自驾'], lat: 37.9293, lng: 102.6383 },
+      { id: 's6', name: '焉支山', timing: '途中', icon: '🏔', type: 'nature', desc: '霍去病击走匈奴之地', tags: ['历史'], lat: 38.0700, lng: 101.4800 },
+      { id: 's7', name: '张掖大佛寺', timing: '下午', icon: '🛕', type: 'culture', desc: '西夏皇家寺院，室内卧佛最大', tags: ['必看'], lat: 38.9320, lng: 100.4432 },
+    ]
+  },
+  {
+    id: 3, label: 'D3', date: '5/25', weekday: '周一',
+    title: '张掖 · 平山湖大峡谷',
+    color: '#a03020', route: '🚗 市区出发约70分钟',
+    spots: [
+      { id: 's9', name: '平山湖大峡谷', timing: '全天', icon: '🏜', type: 'nature', desc: '西北秘境，建议深度游套票', tags: ['必看', '全天'], lat: 39.2480, lng: 100.4100 },
+    ]
+  },
+  {
+    id: 4, label: 'D4', date: '5/26', weekday: '周二',
+    title: '丹霞 → 嘉峪关',
+    color: '#7a5a9a', route: '🚗 张掖→嘉峪关 230km',
+    spots: [
+      { id: 's11', name: '七彩丹霞', timing: '7:30早入', icon: '🌈', type: 'nature', desc: '最美丹霞，四号台视野最佳', tags: ['必看'], lat: 38.9404, lng: 99.8033 },
+      { id: 's13', name: '嘉峪关关城', timing: '傍晚', icon: '🏯', type: 'culture', desc: '"天下第一雄关"，日落最美', tags: ['5A'], lat: 39.8023, lng: 98.2985 },
+    ]
+  },
+  {
+    id: 5, label: 'D5', date: '5/27', weekday: '周三',
+    title: '嘉峪关 → 敦煌',
+    color: '#4a7fa5', route: '🚗 G30最美自驾段',
+    spots: [
+      { id: 's14', name: '长城第一墩', timing: '上午', icon: '🧱', type: 'culture', desc: '讨赖河峡谷俯视角震撼', tags: ['必看'], lat: 39.7685, lng: 98.2300 },
+      { id: 's16', name: '鸣沙山 · 月牙泉', timing: '傍晚', icon: '🌙', type: 'nature', desc: '骑骆驼看沙山日落', tags: ['必看'], lat: 40.0868, lng: 94.6750 },
+    ]
+  },
+  {
+    id: 6, label: 'D6', date: '5/28', weekday: '周四',
+    title: '敦煌深度游',
+    color: '#2a7a5a', route: '📍 敦煌 · 全天',
+    spots: [
+      { id: 's17', name: '莫高窟', timing: '上午', icon: '🗿', type: 'culture', desc: '重点看45、96、158窟。须预约', tags: ['世界遗产'], lat: 40.0359, lng: 94.8082 },
+      { id: 's19', name: '沙洲夜市', timing: '晚', icon: '🥘', type: 'food', desc: '采购特产：风干牛肉、敦煌杏干', tags: ['热闹'], lat: 40.1421, lng: 94.6617 },
+    ]
+  },
+  {
+    id: 7, label: 'D7', date: '5/29', weekday: '周五',
+    title: '敦煌 → 返程',
+    color: '#888888', route: '✈ 各自返程',
+    spots: [
+      { id: 's21', name: '敦煌机场', timing: '12:35起飞', icon: '✈', type: 'transport', desc: '结束愉快行程，各自返程', tags: ['回程'], lat: 40.1611, lng: 94.7986 },
+    ]
+  }
+];
+
+let activeDay = 1;
+let activeSpot = null;
+let mapInstance = null;
+let markers = {};
+
+function renderTabs() {
+  const container = document.getElementById('dayTabs');
+  container.innerHTML = DAYS.map(d => `
+    <button class="day-tab ${d.id === activeDay ? 'active' : ''}" onclick="selectDay(${d.id})">
+      <span class="day-num">${d.label}</span>
+      <span class="day-label">${d.date}</span>
+    </button>
+  `).join('');
+}
+
+function renderContent() {
+  const day = DAYS.find(d => d.id === activeDay);
+  const container = document.getElementById('dayContent');
+  const spotsHtml = day.spots.map(spot => `
+    <div class="spot-card ${spot.id === activeSpot ? 'active' : ''}" id="card-${spot.id}" onclick="selectSpot('${spot.id}')">
+      <div class="spot-card-inner">
+        <div class="spot-icon icon-${spot.type}">${spot.icon}</div>
+        <div class="spot-info">
+          <div class="spot-name">${spot.name} <span class="timing">${spot.timing}</span></div>
+          <div class="spot-desc">${spot.desc}</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  container.innerHTML = `
+    <div class="day-header">
+      <h2>${day.title}</h2>
+      <div class="date-line"><span>${day.date} ${day.weekday}</span><span class="route-badge">${day.route}</span></div>
+    </div>
+    <div class="spots-list">${spotsHtml}</div>
+  `;
+}
+
+function selectDay(id) {
+  activeDay = id; activeSpot = null;
+  renderTabs(); renderContent();
+  focusDayOnMap(id); hidePopup();
+}
+
+function selectSpot(spotId) {
+  activeSpot = spotId; renderContent();
+  const spot = DAYS.flatMap(d => d.spots).find(s => s.id === spotId);
+  if (spot && mapInstance) {
+    mapInstance.setZoomAndCenter(12, [spot.lng, spot.lat]);
+    showPopup(spot);
+  }
+}
+
+// ──────────────────────────────────────────────
+// MAP INITIALIZATION
+// ──────────────────────────────────────────────
+function initMap() {
+  mapInstance = new AMap.Map('map', {
+    zoom: 6,
+    center: [101.5, 39.2],
+    mapStyle: 'amap://styles/whitesmoke',
+  });
+
+  renderAllMarkers();
+  renderLegend();
+  document.getElementById('loadingMap').classList.add('hidden');
+}
+
+function renderAllMarkers() {
+  DAYS.forEach(day => {
+    day.spots.forEach(spot => {
+      if (!spot.lat) return;
+      const marker = new AMap.Marker({
+        position: [spot.lng, spot.lat],
+        content: `<div style="width:28px;height:28px;background:${day.color};border:2.5px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;">${spot.icon}</div>`,
+        offset: new AMap.Pixel(-14, -14),
+      });
+      marker.on('click', () => {
+        activeDay = day.id; activeSpot = spot.id;
+        renderTabs(); renderContent();
+        showPopup(spot);
+      });
+      marker.setMap(mapInstance);
+      markers[spot.id] = marker;
+    });
+  });
+}
+
+function focusDayOnMap(dayId) {
+  const day = DAYS.find(d => d.id === dayId);
+  const validSpots = day.spots.filter(s => s.lat);
+  if (validSpots.length > 0) {
+    const pts = validSpots.map(s => [s.lng, s.lat]);
+    mapInstance.setFitView();
+  }
+}
+
+function showPopup(spot) {
+  const popup = document.getElementById('mapPopup');
+  const day = DAYS.find(d => d.spots.some(s => s.id === spot.id));
+  document.getElementById('popupDay').textContent = `Day ${day.id} · ${day.date}`;
+  document.getElementById('popupTitle').textContent = spot.icon + ' ' + spot.name;
+  document.getElementById('popupBody').textContent = spot.desc;
+  popup.classList.add('visible');
+}
+
+function hidePopup() { document.getElementById('mapPopup').classList.remove('visible'); }
+
+function renderLegend() {
+  const legend = document.getElementById('mapLegend');
+  legend.innerHTML = `<h4>行程路线</h4>` + DAYS.map(d => `
+    <div class="legend-item" onclick="selectDay(${d.id})">
+      <div class="legend-dot" style="background:${d.color}"></div>
+      <span style="color:${d.color};font-weight:500">D${d.id}</span>
+      <span style="font-size:10px;color:#6b5c4e;margin-left:5px">${d.title.split(' → ')[0]}</span>
+    </div>`).join('');
+}
+
+renderTabs(); renderContent();
+</script>
+
+<script type="text/javascript">
+  window._AMapSecurityConfig = {
+    securityJsCode: '77b8532be98159e916d0b862b5c4490e', // 例如: 123456789...
+  };
+</script>
+<script src="https://webapi.amap.com/maps?v=2.0&key=f334dafb887c695983d2e3fa06642cdf&callback=initMap"></script>
+
+</body>
+</html>
